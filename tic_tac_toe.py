@@ -8,7 +8,6 @@ def main_human():
         HumanPlayer(name="Fedor", symbol_class=X),
         HumanPlayer(name="Julia", symbol_class=O),
     ])
-    Game(players="Bentsi")
     game.run()
 
 
