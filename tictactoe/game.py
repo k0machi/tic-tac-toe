@@ -13,13 +13,16 @@ class Game:
 
     def _check(self):
         """
-           If the game ends return True, else False
+           If the game ends return list of winners, else empty list []
         """
-        pass
+        return []
 
     def run(self):
         for player in cycle(self._players):
             move = player.move()
             self._board.board = move
-            if self.check():
+            print(self._board)
+            winners = self._check()
+            if winners:
+                # print winners
                 return
