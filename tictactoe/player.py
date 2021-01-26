@@ -2,7 +2,6 @@ from tictactoe.board import X, O, Point
 from tictactoe.game import Game
 from tictactoe.base_player import Player
 from random import choice
-from time import time_ns
 from typing import Union
 
 class HumanPlayer(Player):
