@@ -1,42 +1,32 @@
-from abc import ABC, abstractmethod
-
 from tictactoe.board import X, O, Point
 from tictactoe.game import Game
-
-
-class Player(ABC):
-    @property
-    @abstractmethod
-    def name(self):
-        pass
-
-    @abstractmethod
-    def move(self):
-        pass
-
-    @property
-    @abstractmethod
-    def symbol(self):
-        pass
-
+from tictactoe.base_player import Player
+from random import choice
+from time import time_ns
+from typing import Union
 
 class HumanPlayer(Player):
-    def __init__(self, name, symbol_class):
+    def __init__(self, name: str, symbol_class: Point):
         self._name = name
         self._symbol_class = symbol_class
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
-    def move(self):
+    def move(self) -> Point:
         symbol = self._symbol_class.__name__
-        loc = input(f"[{self.name}] Where to set {symbol}? (use , to separate) ")
-        x, y = loc.split(",")
-        return self._symbol_class(x=int(x), y=int(y))
+        while True:
+            loc = input(f"[{self.name}] Where to set {symbol}? (use ',' to separate values)> ")
+            try:
+                x, y = loc.split(",")
+            except ValueError:
+                print("Invalid input")
+                continue
+            return self._symbol_class(x=int(x), y=int(y))
 
     @property
-    def symbol(self):
+    def symbol(self) -> Point:
         return self._symbol_class
 
 
@@ -47,48 +37,62 @@ class RoboticPlayer(Player):
         [0,2], [1,1], [2,0]
     ]
 
-    def __init__(self, symbol_class, gamestate: Game):
+    CENTER = [1, 1]
+
+    def __init__(self, symbol_class: Point, gamestate: Game):
         self._name = f"AI ({symbol_class.__name__})"
         self._symbol_class = symbol_class
         self._gamestate = gamestate
+        self._diagonals = list(self.DIAGONAL_CELLS)
 
     @property
-    def symbol(self):
+    def symbol(self) -> Point:
         return self._symbol_class
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
-    def move(self):
-        print(f"{self.name} is thinking...")
-        opponent = [ply for ply in self._gamestate.players if ply != self]
+    def move(self) -> Point:
+        print(f"[{self.name}] Thinking...")
+        opponent = [ply for ply in self._gamestate.players if ply != self].pop()
+        b = self._gamestate.board
+
         # Check for free cells nearing win state
-        for ply in [self.symbol, opponent[0].symbol]:
+        for ply in [self.symbol, opponent.symbol]:
             winstate = None
-            for win in self._gamestate.POSSIBLE_WINS:
-                cells = [cell for row in self._gamestate.board.board for cell in row if [cell.x, cell.y] in win]
-                free_cells_remaining = [cell for cell in cells if type(cell) is Point]
-                if (len(free_cells_remaining) == 1):
-                    winstate = free_cells_remaining[0]
-                    break
+            for win in self._gamestate.candidate_wins:
+                cells = [cell for cell in b.flat_view() if [cell.x, cell.y] in win]
+                cells_occupied = [cell for cell in cells if type(cell) is ply]
+                if (len(cells_occupied) == 2):
+                    free_cells = [cell for cell in cells if type(cell) is Point]
+                    if (len(free_cells) == 1):
+                        winstate = free_cells.pop()
+                        break
+                    else:
+                        # All cells are occupied, remove the candidate
+                        # TODO: Maybe move it to Game::_check
+                        self._gamestate.remove_candidate(win)
             if winstate:
                 return self.symbol(x=winstate.x, y=winstate.y)
         
         # Check if center is free, occuppy if so
-        center = self._gamestate.board.board[1][1]
+        center = b.get_cell(self.CENTER)
         if type(center) is Point:
             return self.symbol(x=center.x, y=center.y)
 
-        # Check first free diagonal cell
-        for cell in self.DIAGONAL_CELLS:
-            board_cell = self._gamestate.board.board[cell[0]][cell[1]]
-            if type(board_cell) is Point:
-                return self.symbol(x=board_cell.x, y=board_cell.y)
+        # Check random free diagonal cell
+        free_diagonals = [b.get_cell(cell) for cell in self._diagonals if type(b.get_cell(cell)) is Point]
+        if len(free_diagonals) > 0:
+            diag = choice(free_diagonals)
+            self._diagonals.remove([diag.x, diag.y])
+            return self.symbol(x=diag.x, y=diag.y)
         
         # Default: return first free cell
-        free_cell = [cell for row in self._gamestate.board.board for cell in row if type(cell) is Point]
-        return self.symbol(x=free_cell.x, y=free_cell.y)
+        free_cells = [cell for cell in b.flat_view() if type(cell) is Point]
+        if len(free_cells) > 0:
+            free_cell = free_cells[::-1].pop()
+            return self.symbol(x=free_cell.x, y=free_cell.y)
         
 
 if __name__ == '__main__':

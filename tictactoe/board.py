@@ -1,9 +1,11 @@
+from typing import List, Union
+
 class Point:
     def __init__(self, x, y):
         self.x = x
         self.y = y
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"[{self.x},{self.y}]"
 
 
@@ -11,7 +13,7 @@ class X(Point):
     def __init__(self, x, y):
         super().__init__(x, y)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "X"
 
 
@@ -19,7 +21,7 @@ class O(Point):
     def __init__(self, x, y):
         super().__init__(x, y)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "O"
 
 
@@ -36,20 +38,29 @@ class Board:
                 self._board[y].append(Point(x, y))
 
     @property
-    def board(self):
+    def board(self) -> List[List[int]]:
         return self._board
 
     @board.setter
-    def board(self, val):
-        if not isinstance(self._board[val.y][val.x], X) and not isinstance(self._board[val.y][val.x], O):
-            self._board[val.y][val.x] = val
-            return
+    def board(self, val: Union[X, O]):
+        try:
+            if type(self._board[val.y][val.x]) is Point:
+                self._board[val.y][val.x] = val
+                return
+        except IndexError:
+            pass
         raise PointOccupiedException("unable to move to occupied cell", val)
 
-    def is_full(self):
-        return len([1 for row in self._board for cell in row if type(cell) is Point])== 0
+    def is_full(self) -> bool:
+        return len([1 for row in self._board for cell in row if type(cell) is Point]) == 0
 
-    def __str__(self):
+    def get_cell(self, coords: List[int]) -> Union[Point, X, O]:
+        return self.board[coords[0]][coords[1]]
+
+    def flat_view(self) -> List[Union[Point, X, O]]:
+        return [cell for row in self.board for cell in row]
+
+    def __str__(self) -> str:
         """
         | X | O |   |
         | O |   |   |

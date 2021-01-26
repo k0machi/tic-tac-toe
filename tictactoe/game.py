@@ -1,6 +1,10 @@
-from tictactoe.board import Board, PointOccupiedException, Point
+from tictactoe.board import Board, PointOccupiedException, Point, X, O
 from itertools import cycle
-
+from tictactoe.base_player import Player
+from typing import List, Tuple, Union
+# Static type aliases
+PlayerList = List[Player]
+CandidateList = List[List[List[int]]]
 
 class Game:
 
@@ -18,31 +22,42 @@ class Game:
         [[0,2], [1,1], [2,0]],
     ]
 
-    def __init__(self, players):
+    def __init__(self, players: PlayerList):
         self._board = Board()
+        self._candidate_wins = list(self.POSSIBLE_WINS)
         self._players = players
 
     @property
-    def players(self):
+    def players(self) -> PlayerList:
         return self._players
 
     @property
-    def board(self):
+    def board(self) -> Board:
         return self._board
 
-    def add_player(self, player):
+    @property
+    def candidate_wins(self) -> CandidateList:
+        return self._candidate_wins
+    
+    def remove_candidate(self, candidate: List[List[int]]) -> bool:
+        if (candidate in self._candidate_wins):
+            self._candidate_wins.remove(candidate)
+            return True
+        return False
+
+    def add_player(self, player: Player):
         self._players.append(player)
 
-    def _check_line(self, winstate, ply_type):
-        hits = [cell for line in self._board.board for cell in line if type(cell) is ply_type and [cell.x, cell.y] in winstate]
+    def _check_line(self, candidate, ply_type) -> Tuple[bool, Union[Point, X, O]]:
+        hits = [cell for line in self._board.board for cell in line if type(cell) is ply_type and [cell.x, cell.y] in candidate]
         return (len(hits) == 3 and ply_type is not Point, ply_type)
 
-    def _check(self):
+    def _check(self) -> Tuple[bool, Union[Point, X, O]]:
         """
-           If the game ends return list of winners, else empty list []
+           Check the state of the board, return tuple containing game status and winning player
         """
 
-        for winstate in self.POSSIBLE_WINS:
+        for winstate in self.candidate_wins:
             for player in self.players:
                 win, player = self._check_line(winstate, ply_type=player.symbol)
                 if win:
@@ -50,7 +65,7 @@ class Game:
 
         return (False, None)
 
-    def run(self):
+    def run(self) -> bool:
         for player in cycle(self._players):
             while True:
                 print("Board:", self._board, sep="\n")
@@ -60,6 +75,9 @@ class Game:
                 except PointOccupiedException:
                     print("[!!!] Illegal move, try again")
                     continue
+                except KeyboardInterrupt:
+                    print(f"\nPlayer {player.name} gives up!")
+                    return
                 else: 
                     break
             
@@ -67,10 +85,10 @@ class Game:
             if self.board.is_full() and not win:
                 print("Board:", self._board, sep="\n")
                 print("It's a draw!")
-                return
+                return False
 
             if win:
-                player_name = [ply.name for ply in self.players if ply.symbol == player_type][0]
+                player_name = [ply.name for ply in self.players if ply.symbol == player_type].pop()
                 print("Board:", self._board, sep="\n")
                 print(f"{player_name} wins!")
-                return
+                return True
