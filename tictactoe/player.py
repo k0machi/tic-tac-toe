@@ -13,6 +13,11 @@ class Player(ABC):
     def move(self):
         pass
 
+    @property
+    @abstractmethod
+    def symbol(self):
+        pass
+
 
 class HumanPlayer(Player):
     def __init__(self, name, symbol_class):
@@ -29,6 +34,9 @@ class HumanPlayer(Player):
         x, y = loc.split(",")
         return self._symbol_class(x=x, y=y)
 
+    @property
+    def symbol(self):
+        return self._symbol_class
 
 class RoboticPlayer(Player):
     pass
