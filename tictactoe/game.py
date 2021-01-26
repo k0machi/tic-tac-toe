@@ -29,6 +29,10 @@ class Game:
     @property
     def board(self):
         return self._board
+
+    def add_player(self, player):
+        self._players.append(player)
+
     def _check_line(self, winstate, ply_type):
         hits = [cell for line in self._board.board for cell in line if type(cell) is ply_type and [cell.x, cell.y] in winstate]
         return (len(hits) == 3 and ply_type is not Point, ply_type)
@@ -37,7 +41,6 @@ class Game:
         """
            If the game ends return list of winners, else empty list []
         """
-        return []
 
         for winstate in self.POSSIBLE_WINS:
             for player in self.players:
@@ -49,10 +52,25 @@ class Game:
 
     def run(self):
         for player in cycle(self._players):
+            while True:
+                print("Board:", self._board, sep="\n")
+                try:
             move = player.move()
             self._board.board = move
-            print(self._board)
-            winners = self._check()
-            if winners:
-                # print winners
+                except PointOccupiedException:
+                    print("[!!!] Illegal move, try again")
+                    continue
+                else: 
+                    break
+            
+            win, player_type = self._check()
+            if self.board.is_full() and not win:
+                print("Board:", self._board, sep="\n")
+                print("It's a draw!")
+                return
+
+            if win:
+                player_name = [ply.name for ply in self.players if ply.symbol == player_type][0]
+                print("Board:", self._board, sep="\n")
+                print(f"{player_name} wins!")
                 return
