@@ -32,7 +32,7 @@ class HumanPlayer(Player):
         symbol = self._symbol_class.__name__
         loc = input(f"[{self.name}] Where to set {symbol}? (use , to separate) ")
         x, y = loc.split(",")
-        return self._symbol_class(x=x, y=y)
+        return self._symbol_class(x=int(x), y=int(y))
 
     @property
     def symbol(self):
