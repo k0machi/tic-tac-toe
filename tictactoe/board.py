@@ -40,7 +40,7 @@ class Board:
                 self._board[y].append(Point(x, y))
 
     @property
-    def board(self) -> List[List[int]]:
+    def board(self) -> List[List[Point]]:
         return self._board
 
     @board.setter
