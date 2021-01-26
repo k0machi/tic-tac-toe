@@ -55,8 +55,8 @@ class Game:
             while True:
                 print("Board:", self._board, sep="\n")
                 try:
-            move = player.move()
-            self._board.board = move
+                    move = player.move()
+                    self._board.board = move
                 except PointOccupiedException:
                     print("[!!!] Illegal move, try again")
                     continue
