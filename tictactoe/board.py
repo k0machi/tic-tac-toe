@@ -1,5 +1,6 @@
 from typing import List, Union
 
+
 class Point:
     def __init__(self, x, y):
         self.x = x
@@ -27,6 +28,7 @@ class O(Point):
 
 class PointOccupiedException(Exception):
     pass
+
 
 class Board:
 

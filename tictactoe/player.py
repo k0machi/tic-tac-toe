@@ -4,6 +4,7 @@ from tictactoe.base_player import Player
 from random import choice
 from typing import Union
 
+
 class HumanPlayer(Player):
     def __init__(self, name: str, symbol_class: Point):
         self._name = name
@@ -16,7 +17,8 @@ class HumanPlayer(Player):
     def move(self) -> Point:
         symbol = self._symbol_class.__name__
         while True:
-            loc = input(f"[{self.name}] Where to set {symbol}? (use ',' to separate values)> ")
+            loc = input(
+                f"[{self.name}] Where to set {symbol}? (use ',' to separate values)> ")
             try:
                 x, y = loc.split(",")
             except ValueError:
@@ -32,8 +34,8 @@ class HumanPlayer(Player):
 class RoboticPlayer(Player):
 
     DIAGONAL_CELLS = [
-        [0,0], [1,1], [2,2], 
-        [0,2], [1,1], [2,0]
+        [0, 0], [1, 1], [2, 2],
+        [0, 2], [1, 1], [2, 0]
     ]
 
     CENTER = [1, 1]
@@ -61,10 +63,14 @@ class RoboticPlayer(Player):
         for ply in [self.symbol, opponent.symbol]:
             winstate = None
             for win in self._gamestate.candidate_wins:
-                cells = [cell for cell in b.flat_view() if [cell.x, cell.y] in win]
+                cells = [cell for cell in b.flat_view() 
+                    if [cell.x, cell.y] in win
+                ]
                 cells_occupied = [cell for cell in cells if type(cell) is ply]
                 if (len(cells_occupied) == 2):
-                    free_cells = [cell for cell in cells if type(cell) is Point]
+                    free_cells = [
+                        cell for cell in cells if type(cell) is Point
+                    ]
                     if (len(free_cells) == 1):
                         winstate = free_cells.pop()
                         break
@@ -74,25 +80,28 @@ class RoboticPlayer(Player):
                         self._gamestate.remove_candidate(win)
             if winstate:
                 return self.symbol(x=winstate.x, y=winstate.y)
-        
+
         # Check if center is free, occuppy if so
         center = b.get_cell(self.CENTER)
         if type(center) is Point:
             return self.symbol(x=center.x, y=center.y)
 
         # Check random free diagonal cell
-        free_diagonals = [b.get_cell(cell) for cell in self._diagonals if type(b.get_cell(cell)) is Point]
+        free_diagonals = [
+            b.get_cell(cell) for cell in self._diagonals 
+            if type(b.get_cell(cell)) is Point
+        ]
         if len(free_diagonals) > 0:
             diag = choice(free_diagonals)
             self._diagonals.remove([diag.x, diag.y])
             return self.symbol(x=diag.x, y=diag.y)
-        
+
         # Default: return first free cell
         free_cells = [cell for cell in b.flat_view() if type(cell) is Point]
         if len(free_cells) > 0:
             free_cell = free_cells[::-1].pop()
             return self.symbol(x=free_cell.x, y=free_cell.y)
-        
+
 
 if __name__ == '__main__':
     player = HumanPlayer(name="Fedor", symbol_class=X)

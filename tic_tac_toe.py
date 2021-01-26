@@ -44,17 +44,19 @@ def main():
                     break
                 except ValueError:
                     print("Not a number")
-            
-            player_names = [input(f"Enter player {i + 1} name> ") for i in range(human_players)]
 
+            player_names = [
+                input(f"Enter player {i + 1} name> ") for i in range(human_players)]
 
             game = Game(players=[])
             symbols = cycle([X, O])
             for v in player_names:
-                game.add_player(HumanPlayer(name=v, symbol_class=next(symbols)))
-            
+                game.add_player(HumanPlayer(
+                    name=v, symbol_class=next(symbols)))
+
             for _ in range(2 - human_players):
-                game.add_player(RoboticPlayer(symbol_class=next(symbols), gamestate=game))
+                game.add_player(RoboticPlayer(
+                    symbol_class=next(symbols), gamestate=game))
 
             game.run()
             answer = input("Play again? y/n> ")

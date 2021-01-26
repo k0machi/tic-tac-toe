@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from tictactoe.board import Point
 
+
 class Player(ABC):
     @property
     @abstractmethod
@@ -15,4 +16,3 @@ class Player(ABC):
     @abstractmethod
     def symbol(self) -> Point:
         pass
-
