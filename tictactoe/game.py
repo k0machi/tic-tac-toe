@@ -49,17 +49,16 @@ class Game:
         self._players.append(player)
 
     def _check_line(self, candidate, ply_type) -> Tuple[bool, Union[Point, X, O]]:
-        hits = [cell for line in self._board.board for cell in line if type(cell) is ply_type and [cell.x, cell.y] in candidate]
+        hits = [cell for cell in self._board.flat_view() if type(cell) is ply_type and [cell.x, cell.y] in candidate]
         return (len(hits) == 3 and ply_type is not Point, ply_type)
 
     def _check(self) -> Tuple[bool, Union[Point, X, O]]:
         """
            Check the state of the board, return tuple containing game status and winning player
         """
-
         for winstate in self.candidate_wins:
             for player in self.players:
-                win, player = self._check_line(winstate, ply_type=player.symbol)
+                win, player = self._check_line(candidate=winstate, ply_type=player.symbol)
                 if win:
                     return (True, player)
 
