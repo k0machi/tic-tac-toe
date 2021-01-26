@@ -12,7 +12,7 @@ class X(Point):
         super().__init__(x, y)
 
     def __str__(self):
-        return "X" + super().__str__()
+        return "X"
 
 
 class O(Point):
@@ -20,17 +20,20 @@ class O(Point):
         super().__init__(x, y)
 
     def __str__(self):
-        return "O" + super().__str__()
+        return "O"
 
+
+class PointOccupiedException(Exception):
+    pass
 
 class Board:
 
     def __init__(self):
-        self._board = [
-            [" ", " ", " "],
-            [" ", " ", " "],
-            [" ", " ", " "],
-        ]
+        self._board = list()
+        for y in range(3):
+            self._board.append(list())
+            for x in range(3):
+                self._board[y].append(Point(x, y))
 
     @property
     def board(self):
@@ -38,7 +41,13 @@ class Board:
 
     @board.setter
     def board(self, val):
-        self._board[val.x][val.y] = str(val)
+        if not isinstance(self._board[val.y][val.x], X) and not isinstance(self._board[val.y][val.x], O):
+            self._board[val.y][val.x] = val
+            return
+        raise PointOccupiedException("unable to move to occupied cell", val)
+
+    def is_full(self):
+        return len([1 for row in self._board for cell in row if type(cell) is Point])== 0
 
     def __str__(self):
         """
@@ -48,5 +57,5 @@ class Board:
         """
         board_str = ""
         for line in self._board:
-            board_str += "| " + " | ".join(line) + " |\n"
+            board_str += f"|\t{line[0]}\t|\t{line[1]}\t|\t{line[2]}\t|\n"
         return board_str
